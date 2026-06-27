@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>P1 English Revision Game</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background: #fdf6e3;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #app {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 40px;
+            padding: 20px 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 28px;
+            color: #ff6b6b;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        #progress {
+            font-size: 20px;
+            background: #f8f9fa;
+            padding: 8px 16px;
+            border-radius: 30px;
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #question-box {
+            background: #fff9f0;
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: inset 0 0 0 2px #ffe8d6;
+        }
+        #image-area {
+            text-align: center;
+            margin-bottom: 15px;
+            min-height: 150px;
+        }
+        #image-area img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #eee;
+        }
+        #question-text {
+            font-size: 24px;
+            line-height: 1.5;
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #answer-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* === 修正：改成 iPad 原生支援手寫的 Textarea === */
+        #writing-area {
+            width: 100%;
+            min-height: 130px;
+            padding: 20px;
+            background: #ffffff;
+            border: 3px dashed #b2bec3;
+            border-radius: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2d3436;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.03);
+            transition: all 0.2s;
+            text-align: left;
+            font-family: inherit;
+        }
+        #writing-area:focus {
+            border-color: #ffb74d;
+            background: #fffbf5;
+        }
+        .writing-hint {
+            text-align: center;
+            font-size: 14px;
+            color: #b2bec3;
+            margin-top: -5px;
+            margin-bottom: 5px;
+            pointer-events: none;
+        }
+
+        #options-area {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+        .option-btn {
+            background: #e0f7fa;
+            border: 3px solid #00bcd4;
+            border-radius: 30px;
+            padding: 15px 30px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #006064;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 120px;
+            touch-action: manipulation;
+        }
+        .option-btn:active { background: #b2ebf2; transform: scale(0.95); }
+        #action-btn {
+            background: #ffb74d;
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 15px 40px;
+            margin-top: 15px;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #f57c00;
+            transition: 0.05s linear;
+            touch-action: manipulation;
+        }
+        #action-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        #feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            background: #f1f2f6;
+            display: none;
+        }
+        .correct-fb { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+        .wrong-fb { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+        #result-box {
+            text-align: center;
+            display: none;
+            padding: 20px;
+        }
+        #result-box h2 { font-size: 30px; color: #2d3436; }
+        #result-box p { font-size: 24px; }
+        #restart-btn {
+            background: #6c5ce7;
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-size: 28px;
+            padding: 20px 40px;
+            margin-top: 20px;
+            width: 80%;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #341f97;
+            transition: 0.05s linear;
+            touch-action: manipulation;
+        }
+        #restart-btn:active { transform: translateY(4px); box-shadow: none; }
+        .hidden { display: none !important; }
+        @media (max-width: 600px) {
+            #question-text { font-size: 20px; }
+            #writing-area { font-size: 28px; min-height: 100px; }
+            .option-btn { padding: 12px 20px; font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <h1>🌟 P1 Revision Game 🌟</h1>
+    <div id="progress">Question 1 / 30</div>
+    <div id="question-box">
+        <div id="image-area"></div>
+        <div id="question-text">Loading...</div>
+        <div id="answer-area">
+            <textarea id="writing-area" rows="2" placeholder="✍️ Use Apple Pencil to write here..."></textarea>
+            <div class="writing-hint">📝 用 Apple Pencil 在框內寫字，停頓兩秒會自動變成印刷體</div>
+            <div id="options-area" class="hidden"></div>
+        </div>
+        <button id="action-btn">Check Answer ✅</button>
+        <div id="feedback"></div>
+    </div>
+    <div id="result-box">
+        <h2>🎉 Game Finished! 🎉</h2>
+        <p id="score-text">Your Score: 0 / 30</p>
+        <button id="restart-btn">🔄 Play Again</button>
+    </div>
+</div>
+<script>
+    // ============================================================
+    // 1. QUESTION BANK (覆盖所有温习内容，包含真实图片链接)
+    // ============================================================
+    const questionBank = [
+        // --- Festivals & Dates ---
+        { id: 'q1', type: 'fill', topic: 'festival', diff: 1, q: 'Which festival is on 25th December?', img: 'https://images.pexels.com/photos/2574498/pexels-photo-2574498.jpeg', ans: 'Christmas' },
+        { id: 'q2', type: 'fill', topic: 'festival', diff: 1, q: 'Children receive red ______ during Chinese New Year.', img: 'https://images.pexels.com/photos/545431/pexels-photo-545431.jpeg', ans: 'packets' },
+        { id: 'q3', type: 'fill', topic: 'festival', diff: 1, q: 'People eat ______ during the Dragon Boat Festival.', img: 'https://images.pexels.com/photos/5394045/pexels-photo-5394045.jpeg', ans: 'rice dumplings' },
+        { id: 'q4', type: 'fill', topic: 'festival', diff: 2, q: 'Macau SAR Establishment Day is on 20th of ______.', img: 'https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg', ans: 'December' },
+        { id: 'q5', type: 'fill', topic: 'festival', diff: 2, q: 'The second Sunday of May is ______ Day.', img: 'https://images.pexels.com/photos/1701686/pexels-photo-1701686.jpeg', ans: "Mother's" },
+        { id: 'q6', type: 'fill', topic: 'festival', diff: 2, q: 'We eat ______ cake during Mid-Autumn Festival.', img: 'https://images.pexels.com/photos/1319410/pexels-photo-1319410.jpeg', ans: 'moon' },
+        { id: 'q7', type: 'fill', topic: 'festival', diff: 2, q: 'Easter is around March to ______.', img: 'https://images.pexels.com/photos/1455473/pexels-photo-1455473.jpeg', ans: 'April' },
+        // --- Home Safety & Rooms ---
+        { id: 'q8', type: 'fill', topic: 'safety', diff: 1, q: 'We should NOT open the door for ______.', img: 'https://images.pexels.com/photos/716411/pexels-photo-716411.jpeg', ans: 'strangers' },
+        { id: 'q9', type: 'fill', topic: 'safety', diff: 1, q: 'A cutter/knife is dangerous because it could ______ my fingers.', img: 'https://images.pexels.com/photos/5591661/pexels-photo-5591661.jpeg', ans: 'cut' },
+        { id: 'q10', type: 'fill', topic: 'safety', diff: 2, q: 'Don\'t ______ with fire at home.', img: 'https://images.pexels.com/photos/263310/pexels-photo-263310.jpeg', ans: 'play' },
+        { id: 'q11', type: 'fill', topic: 'room', diff: 1, q: 'Toothbrush is usually in the ______.', img: 'https://images.pexels.com/photos/271636/pexels-photo-271636.jpeg', ans: 'bathroom' },
+        { id: 'q12', type: 'fill', topic: 'room', diff: 1, q: 'The television is in the ______ room.', img: 'https://images.pexels.com/photos/3728832/pexels-photo-3728832.jpeg', ans: 'living' },
+        { id: 'q13', type: 'fill', topic: 'room', diff: 1, q: 'We sleep on pillows in the ______.', img: 'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg', ans: 'bedroom' },
+        // --- Materials & Energy ---
+        { id: 'q14', type: 'fill', topic: 'material', diff: 1, q: 'Windows are made of ______ to let light pass through.', img: 'https://images.pexels.com/photos/290595/pexels-photo-290595.jpeg', ans: 'glass' },
+        { id: 'q15', type: 'fill', topic: 'material', diff: 2, q: 'A fridge needs ______ to work.', img: 'https://images.pexels.com/photos/6008030/pexels-photo-6008030.jpeg', ans: 'electricity' },
+        { id: 'q16', type: 'mcq', topic: 'material', diff: 1, q: 'Which of these is made of plastic?', img: 'https://images.pexels.com/photos/5998857/pexels-photo-5998857.jpeg', options: ['Broom', 'Plastic Bottle', 'Chair'], ans: 'Plastic Bottle' },
+        // --- Park Rules & Things ---
+        { id: 'q17', type: 'fill', topic: 'park', diff: 1, q: 'Don\'t ______ on public facilities.', img: 'https://images.pexels.com/photos/67188/pexels-photo-67188.jpeg', ans: 'write' },
+        { id: 'q18', type: 'fill', topic: 'park', diff: 1, q: 'Don\'t ______ trees in the park.', img: 'https://images.pexels.com/photos/1285601/pexels-photo-1285601.jpeg', ans: 'climb' },
+        { id: 'q19', type: 'mcq', topic: 'park', diff: 2, q: 'What is the RIGHT thing to do in a park?', img: 'https://images.pexels.com/photos/879746/pexels-photo-879746.jpeg', options: ['Litter on the floor', 'Feed the fish', 'Write on the bench'], ans: 'Feed the fish' },
+        // --- Animals, Plants, Living Things ---
+        { id: 'q20', type: 'fill', topic: 'biology', diff: 1, q: 'Humans and koalas both have ______.', img: 'https://images.pexels.com/photos/5765512/pexels-photo-5765512.jpeg', ans: 'fingerprints' },
+        { id: 'q21', type: 'fill', topic: 'biology', diff: 2, q: 'Koalas use their fingerprints to ______ trees.', img: 'https://images.pexels.com/photos/213064/pexels-photo-213064.jpeg', ans: 'grip' },
+        { id: 'q22', type: 'mcq', topic: 'biology', diff: 1, q: 'Which animal CANNOT fly?', img: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg', options: ['Bird', 'Dog', 'Butterfly'], ans: 'Dog' },
+        { id: 'q23', type: 'fill', topic: 'biology', diff: 2, q: 'A sunflower is a plant with ______.', img: 'https://images.pexels.com/photos/1162672/pexels-photo-1162672.jpeg', ans: 'flowers' },
+        { id: 'q24', type: 'fill', topic: 'biology', diff: 2, q: 'A tree is a plant ______ flowers (some do not have).', img: 'https://images.pexels.com/photos/101350/pexels-photo-101350.jpeg', ans: 'without' },
+        { id: 'q25', type: 'fill', topic: 'biology', diff: 1, q: 'A fish is a ______ thing.', img: 'https://images.pexels.com/photos/33041/pexels-photo-33041.jpeg', ans: 'living' },
+        { id: 'q26', type: 'fill', topic: 'biology', diff: 2, q: 'A rock in the park is a ______ thing.', img: 'https://images.pexels.com/photos/862695/pexels-photo-862695.jpeg', ans: 'non-living' },
+        // --- Chinese Meanings (Vocabulary) ---
+        { id: 'q27', type: 'fill', topic: 'vocab', diff: 1, q: 'What is the Chinese meaning of "accident"?', img: 'https://images.pexels.com/photos/1210276/pexels-photo-1210276.jpeg', ans: '意外' },
+        { id: 'q28', type: 'fill', topic: 'vocab', diff: 2, q: 'What is the Chinese meaning of "facility"?', img: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg', ans: '设施' },
+        // --- Reading Comprehension (Short Passage) ---
+        { id: 'q29', type: 'fill', topic: 'comprehension', diff: 1, q: 'Read: Tom is at the park. He sees a bird flying. A dog is walking. What animal can fly? (Answer: bird)', img: 'https://images.pexels.com/photos/36717/pexels-photo-36717.jpeg', ans: 'bird' },
+        { id: 'q30', type: 'fill', topic: 'comprehension', diff: 2, q: 'Read: Tom likes the flower. He plays on the swing. What has flowers?', img: 'https://images.pexels.com/photos/1251180/pexels-photo-1251180.jpeg', ans: 'flower' },
+        // --- 更多题库用于差异化出题 (Hard/Alternatives) ---
+        { id: 'q31', type: 'fill', topic: 'festival', diff: 3, q: 'What is the date of Chinese New Year? (Based on lunar calendar)', img: 'https://images.pexels.com/photos/341970/pexels-photo-341970.jpeg', ans: '1st day of first lunar month' },
+        { id: 'q32', type: 'fill', topic: 'safety', diff: 3, q: 'If someone faints at home, we should call an ______.', img: 'https://images.pexels.com/photos/886743/pexels-photo-886743.jpeg', ans: 'adult' },
+        { id: 'q33', type: 'fill', topic: 'room', diff: 3, q: 'Where do you keep the rubbish bin? (Usually in the kitchen or ______)', img: 'https://images.pexels.com/photos/139398/pexels-photo-139398.jpeg', ans: 'bathroom' },
+        { id: 'q34', type: 'fill', topic: 'park', diff: 3, q: 'Which park rule means we should throw rubbish into the bin? (Don\'t ______)', img: 'https://images.pexels.com/photos/1267443/pexels-photo-1267443.jpeg', ans: 'litter' },
+        { id: 'q35', type: 'fill', topic: 'vocab', diff: 3, q: 'What is "energy" in Chinese?', img: 'https://images.pexels.com/photos/296259/pexels-photo-296259.jpeg', ans: '能量' }
+    ];
+
+    // ============================================================
+    // 2. GAME LOGIC
+    // ============================================================
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    
+    // 修复：加上 try-catch 防止 LocalStorage 数据损坏导致程序崩溃 (Loading)
+    let previousAttempt = { correct: [], wrong: [] };
+    try {
+        const savedData = localStorage.getItem('exam_game_history');
+        if (savedData) {
+            previousAttempt = JSON.parse(savedData);
+        }
+    } catch (e) {
+        console.log("History data error, resetting.");
+        previousAttempt = { correct: [], wrong: [] };
+    }
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 自适应出题逻辑
+    function generateQuestions(count) {
+        let pool = [...questionBank];
+        let selected = [];
+
+        // 1. 筛选出前一次的错题对应的主题
+        let wrongTopics = [];
+        if (previousAttempt && previousAttempt.wrong) {
+            previousAttempt.wrong.forEach(id => {
+                let found = questionBank.find(q => q.id === id);
+                if(found) wrongTopics.push(found.topic);
+            });
+        }
+
+        // 2. 优先选择之前做错的主题（难度增加）
+        let poolHard = pool.filter(q => wrongTopics.includes(q.topic) && q.diff >= 2);
+        shuffleArray(poolHard);
+        for (let q of poolHard) {
+            if (selected.length >= count) break;
+            if (!selected.some(s => s.id === q.id)) {
+                selected.push(q);
+            }
+        }
+
+        // 3. 补齐剩余题目
+        shuffleArray(pool);
+        for (let q of pool) {
+            if (selected.length >= count) break;
+            if (!selected.some(s => s.id === q.id)) {
+                selected.push(q);
+            }
+        }
+
+        // 4. 绝对保证返回 30 题，防止报错
+        while(selected.length < count) {
+            let extra = pool[Math.floor(Math.random() * pool.length)];
+            if (!selected.some(s => s.id === extra.id)) {
+                selected.push(extra);
+            }
+        }
+
+        // 5. 打乱顺序
+        shuffleArray(selected);
+        return selected;
+    }
+
+    function renderQuestion() {
+        if (currentIndex >= currentQuestions.length) {
+            endGame();
+            return;
+        }
+        answered = false;
+        let qData = currentQuestions[currentIndex];
+        
+        document.getElementById('progress').innerText = `Question ${currentIndex + 1} / ${currentQuestions.length}`;
+        
+        // Image
+        let imgArea = document.getElementById('image-area');
+        if (qData.img) {
+            imgArea.innerHTML = `<img src="${qData.img}" alt="Question Image" onerror="this.style.display='none'">`;
+        } else {
+            imgArea.innerHTML = '';
+        }
+
+        // Question Text
+        document.getElementById('question-text').innerText = qData.q;
+
+        // Input / Options
+        let writingArea = document.getElementById('writing-area');
+        let optionsArea = document.getElementById('options-area');
+        let feedback = document.getElementById('feedback');
+        let actionBtn = document.getElementById('action-btn');
+
+        feedback.style.display = 'none';
+        feedback.className = '';
+        
+        if (qData.type === 'mcq') {
+            writingArea.classList.add('hidden');
+            document.querySelector('.writing-hint').classList.add('hidden');
+            optionsArea.classList.remove('hidden');
+            optionsArea.innerHTML = qData.options.map(opt => 
+                `<button class="option-btn" data-value="${opt}">${opt}</button>`
+            ).join('');
+            optionsArea.querySelectorAll('.option-btn').forEach(btn => {
+                btn.onclick = function() {
+                    document.querySelectorAll('.option-btn').forEach(b => b.style.borderColor = '#00bcd4');
+                    this.style.borderColor = '#ff6b6b';
+                    writingArea.value = this.getAttribute('data-value');
+                };
+            });
+            writingArea.value = '';
+        } else {
+            writingArea.classList.remove('hidden');
+            document.querySelector('.writing-hint').classList.remove('hidden');
+            optionsArea.classList.add('hidden');
+            writingArea.value = '';
+            writingArea.focus();
+        }
+        actionBtn.innerText = 'Check Answer ✅';
+    }
+
+    function checkAnswer() {
+        if (answered) return;
+        let qData = currentQuestions[currentIndex];
+        let writingArea = document.getElementById('writing-area');
+        let userAnswer = writingArea.value.trim().toLowerCase();
+        let correctAnswer = String(qData.ans).toLowerCase();
+        let feedback = document.getElementById('feedback');
+        let actionBtn = document.getElementById('action-btn');
+        
+        // 处理选择题
+        if (qData.type === 'mcq') {
+            userAnswer = writingArea.value.trim();
+            if (!userAnswer) {
+                feedback.innerText = 'Please select an option!';
+                feedback.className = 'wrong-fb';
+                feedback.style.display = 'block';
+                return;
+            }
+        } else {
+            if (!userAnswer) {
+                feedback.innerText = 'Please write your answer!';
+                feedback.className = 'wrong-fb';
+                feedback.style.display = 'block';
+                return;
+            }
+        }
+
+        answered = true;
+        let isCorrect = userAnswer === correctAnswer;
+        if (isCorrect) {
+            score++;
+            feedback.innerText = `✅ Correct! The answer is: ${qData.ans}`;
+            feedback.className = 'correct-fb';
+        } else {
+            feedback.innerText = `❌ Oops! The correct answer is: ${qData.ans}`;
+            feedback.className = 'wrong-fb';
+        }
+        feedback.style.display = 'block';
+        actionBtn.innerText = 'Next Question ➡️';
+        
+        // 记录答题历史
+        if (!previousAttempt.correct) previousAttempt.correct = [];
+        if (!previousAttempt.wrong) previousAttempt.wrong = [];
+        if (isCorrect) {
+            previousAttempt.correct.push(qData.id);
+            let idx = previousAttempt.wrong.indexOf(qData.id);
+            if (idx > -1) previousAttempt.wrong.splice(idx, 1);
+        } else {
+            previousAttempt.wrong.push(qData.id);
+        }
+        localStorage.setItem('exam_game_history', JSON.stringify(previousAttempt));
+    }
+
+    function nextQuestion() {
+        if (!answered) {
+            checkAnswer();
+            return;
+        }
+        currentIndex++;
+        renderQuestion();
+    }
+
+    function endGame() {
+        document.getElementById('question-box').style.display = 'none';
+        document.getElementById('progress').style.display = 'none';
+        let resultBox = document.getElementById('result-box');
+        resultBox.style.display = 'block';
+        document.getElementById('score-text').innerText = `Your Score: ${score} / ${currentQuestions.length}`;
+    }
+
+    function initGame() {
+        try {
+            const savedData = localStorage.getItem('exam_game_history');
+            if (savedData) previousAttempt = JSON.parse(savedData);
+        } catch (e) { previousAttempt = { correct: [], wrong: [] }; }
+
+        currentQuestions = generateQuestions(30);
+        currentIndex = 0;
+        score = 0;
+        document.getElementById('result-box').style.display = 'none';
+        document.getElementById('question-box').style.display = 'block';
+        document.getElementById('progress').style.display = 'block';
+        document.getElementById('action-btn').innerText = 'Check Answer ✅';
+        document.getElementById('action-btn').onclick = nextQuestion;
+        renderQuestion();
+    }
+
+    // 第一次加载页面
+    window.onload = function() {
+        initGame();
+        document.getElementById('restart-btn').onclick = function() {
+            initGame();
+        };
+    };
+</script>
+</body>
+</html>
